@@ -1,0 +1,24 @@
+{
+  "name": "express-parcel-template",
+  "version": "1.0.0",
+  "description": "Express + Parcel template repo",
+  "repository": "https://github.com/jayantbh/express-parcel-template",
+  "author": "Jayant Bhawal <bhawal.jayant@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "@parcel/transformer-sass": "2.0.0-beta.2",
+    "concurrently": "^6.0.2",
+    "hbs": "^4.1.2",
+    "parcel": "^2.0.0-beta.2"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.1"
+  },
+  "scripts": {
+    "build-pages": "parcel watch public/*.html",
+    "node-server": "node index.js",
+    "start": "concurrently \"yarn build-pages\" \"yarn node-server\""
+  }
+}
