@@ -1,7 +1,9 @@
 const fetch = require("node-fetch");
 const express = require("express");
 const path = require("path");
+const knex = require("knex");
 
+const knexfile = require("../knexfile");
 const app = express();
 
 const port = process.env.port || 3000;
@@ -19,6 +21,19 @@ app.get("/", async (req, res) => {
 
 app.get("/status", (req, res) => {
   res.sendStatus(200);
+});
+
+/**
+ * @type {Knex}
+ */
+const database = knex({
+  client: "pg",
+  connection: {
+    host: "127.0.0.1",
+    user: "your_database_user",
+    password: "your_database_password",
+    database: "myapp_test",
+  },
 });
 
 app.use(express.static("dist"));
