@@ -26,6 +26,7 @@
     "node-server": "node index.js",
     "watch-server": "nodemon index.js",
     "reset-db": "knex migrate:rollback --all && knex migrate:latest",
-    "start": "concurrently \"yarn watch-pages\" \"yarn watch-server\""
+    "start": "concurrently \"yarn watch-pages\" \"yarn watch-server\"",
+    "build": "yarn build-pages"
   }
 }
