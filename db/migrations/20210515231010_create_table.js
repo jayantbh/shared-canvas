@@ -1,4 +1,4 @@
-const updateTimestampTrigger = require("../triggers/update_timestamp");
+const { TRIGGER } = require("../triggers/update_timestamp");
 
 exports.up = (knex) =>
   knex.schema
@@ -10,6 +10,6 @@ exports.up = (knex) =>
       t.timestamp("created_at", { useTz: true }).defaultTo(knex.fn.now());
       t.timestamp("updated_at", { useTz: true }).defaultTo(knex.fn.now());
     })
-    .then(() => updateTimestampTrigger("canvas_entries"));
+    .then(() => knex.raw(TRIGGER("canvas_entries")));
 
 exports.down = (knex) => knex.schema.dropTableIfExists("canvas_entries");
