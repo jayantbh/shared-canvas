@@ -1,8 +1,8 @@
 {
-  "name": "express-parcel-template",
+  "name": "shared-canvas",
   "version": "1.0.0",
-  "description": "Express + Parcel template repo",
-  "repository": "https://github.com/jayantbh/express-parcel-template",
+  "description": "A real-time shared drawing experience",
+  "repository": "https://github.com/jayantbh/shared-canvas",
   "author": "Jayant Bhawal <bhawal.jayant@gmail.com>",
   "license": "MIT",
   "private": true,
