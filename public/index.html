@@ -1,21 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Express + Parcel</title>
 
-    <script src="./main.js"></script>
-    <link rel="stylesheet" href="./reset.css">
-    <link rel="stylesheet" href="./main.scss">
-</head>
-<body>
+    <link rel="stylesheet" href="./reset.css" />
+    <link rel="stylesheet" href="./main.scss" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arvo&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="container">
-        <h1>Welcome!</h1>
-        <h2>To the Express + Parcel template app</h2>
-        <br>
-        <h3>Backend status: <span id="backend-status">{{status}}</span></h3>
+      <div class="controls">
+        <div>
+          <h1>
+            <span>Shared Canvas</span>
+            <small>Real-time drawing experience</small>
+          </h1>
+        </div>
+        <div class="colors">
+          <div id="color-list">
+            {{#each colors}}
+            <svg color="{{this}}" height="60" width="60" viewBox="0 0 60 60">
+              <circle r="30" cy="30" cx="30" fill="currentColor"></circle>
+            </svg>
+            {{/each}}
+          </div>
+        </div>
+        <button id="clear-button">Clear your draw</button>
+      </div>
+      <div class="canvases">
+        <canvas id="view-area" height="4000" width="4000"></canvas>
+        <canvas id="draw-area" height="4000" width="4000"></canvas>
+      </div>
     </div>
-</body>
+    <script src="./main.js"></script>
+  </body>
 </html>

@@ -1,11 +1,17 @@
 h1 {
   font-size: 3em;
 }
-h2 {
-  font-size: 2.4em;
+
+body {
+  width: 100vw;
+  font-family: "Arvo", serif;
+  background-color: #e7e7e7;
+  display: flex;
+  justify-content: center;
 }
-h3 {
-  font-size: 1.8em;
+
+small {
+  font-size: 0.5em;
 }
 
 .container {
@@ -13,8 +19,171 @@ h3 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
-  width: 100vw;
-  background-color: darkslategrey;
-  color: white;
+  height: 100%;
+  width: fit-content;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  h1 {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.colors {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+#color-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-gap: 20px;
+  cursor: cell;
+  width: fit-content;
+  border: 1px solid grey;
+  padding: 20px;
+  border-radius: 12px;
+
+  svg {
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #f0f0f0;
+  }
+}
+
+#clear-button {
+  margin-top: auto;
+  border: none;
+  border-radius: 8px;
+  background: #e0e0e0;
+  box-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #f0f0f0;
+  padding: 12px 20px;
+  font-family: "Arvo", serif;
+  font-size: 1.2em;
+}
+
+@mixin small-color-list {
+  #color-list {
+    grid-template-columns: unset;
+    display: flex;
+    flex-wrap: wrap;
+    grid-gap: 10px;
+
+    svg {
+      height: 30px;
+      width: 30px;
+    }
+  }
+}
+
+// Taller
+@media (max-aspect-ratio: 1/1) {
+  body {
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 2.4em;
+  }
+
+  .container {
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  @include small-color-list;
+
+  .canvases {
+    margin-top: 24px;
+    flex-shrink: 0;
+  }
+
+  @media (hover: none) {
+    .canvases {
+      touch-action: none;
+    }
+  }
+}
+
+// Wider
+@media (min-aspect-ratio: 1/1) {
+  body {
+    height: 100vh;
+  }
+  .container {
+    flex-direction: row;
+  }
+
+  .controls {
+    padding-right: 64px;
+  }
+
+  .canvases {
+    margin-left: auto;
+  }
+
+  @media (max-width: 1300px) {
+    h1 {
+      font-size: 2.4em;
+    }
+
+    #color-list {
+      grid-gap: 16px;
+
+      svg {
+        height: 40px;
+        width: 40px;
+      }
+    }
+  }
+
+  @media (max-width: 950px) {
+    h1 {
+      font-size: 1.8em;
+    }
+
+    .controls {
+      max-width: min-content;
+      min-width: 152px;
+    }
+
+    @include small-color-list;
+  }
+}
+
+.canvases {
+  position: relative;
+  background-color: #e7e7e7;
+  box-shadow: 11px 11px 22px #c7c7c7, -11px -11px 22px #f9f9f9;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#draw-area {
+  position: relative;
+  z-index: 1;
+}
+
+#view-area {
+  position: absolute;
+}
+
+@supports (aspect-ratio: 1) {
+  .canvases {
+    aspect-ratio: 1;
+    max-height: 100%;
+    max-width: 100%;
+
+    canvas {
+      height: 100%;
+      width: 100%;
+    }
+  }
 }

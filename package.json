@@ -17,11 +17,15 @@
     "dotenv": "^9.0.0",
     "express": "^4.17.1",
     "knex": "^0.95.4",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "socket.io": "^4.0.2"
   },
   "scripts": {
-    "build-pages": "parcel watch public/*.html",
+    "build-pages": "parcel build public/*.html",
+    "watch-pages": "parcel watch public/*.html",
     "node-server": "node index.js",
-    "start": "concurrently \"yarn build-pages\" \"yarn node-server\""
+    "watch-server": "nodemon index.js",
+    "reset-db": "knex migrate:rollback --all && knex migrate:latest",
+    "start": "concurrently \"yarn watch-pages\" \"yarn watch-server\""
   }
 }
