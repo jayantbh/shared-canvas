@@ -51,6 +51,9 @@ io.on("connection", async (socket) => {
   log(ip, "A user connected.");
   // const ip = "127.0.1.1";
 
+  socket.emit("client-connection", io.engine.clientsCount);
+  socket.broadcast.emit("client-connection", io.engine.clientsCount);
+
   const uuid = await db("canvas_entries")
     .insert({ ip })
     .onConflict("ip")
@@ -91,6 +94,7 @@ io.on("connection", async (socket) => {
 
   socket.on("disconnect", function () {
     log(ip, "A user disconnected.");
+    socket.broadcast.emit("client-connection", io.engine.clientsCount);
   });
 });
 

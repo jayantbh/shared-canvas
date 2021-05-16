@@ -13,6 +13,12 @@ body {
 small {
   font-size: 0.5em;
 }
+#client-status {
+  margin-top: 0.5em;
+  span:last-child {
+    display: none;
+  }
+}
 
 .container {
   display: flex;

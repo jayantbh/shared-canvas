@@ -49,9 +49,28 @@ class WorkerCanvas {
     this.drawStuff();
   };
 
+  swapClientStatusText = () => {
+    const el = document.getElementById("client-status");
+    if (!el) return;
+
+    setInterval(() => {
+      const child = el.children[0];
+      el.removeChild(child);
+      el.appendChild(child);
+    }, 5000);
+  };
+
   initSocket = () => {
     this.socket = io();
     console.info("Loaded!", this.socket);
+    this.swapClientStatusText();
+
+    this.socket.on("client-connection", (count) => {
+      console.log("Client", count);
+      document.getElementById("client-count").innerText = `${count} user${
+        count !== 1 ? "s" : ""
+      } drawing here`;
+    });
 
     /**
      * Only fired on connection
