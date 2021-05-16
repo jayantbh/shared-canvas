@@ -1,4 +1,3 @@
-const fetch = require("node-fetch");
 const express = require("express");
 const http = require("http");
 
@@ -52,15 +51,17 @@ io.on("connection", async (socket) => {
   log(ip, "A user connected.");
   // const ip = "127.0.1.1";
 
-  const result = await db("canvas_entries")
+  const uuid = await db("canvas_entries")
     .insert({ ip })
     .onConflict("ip")
     .merge()
     .returning("uuid")
     .then((res) => res[0]);
 
+  console.log(uuid);
+
   const [allArt, myArt] = await getAllArt(ip);
-  socket.emit("image", allArt, myArt);
+  socket.emit("image", allArt, myArt, uuid);
 
   socket.on("clear-image", async function (cb) {
     log(ip, "A user cleared image.");
@@ -68,7 +69,7 @@ io.on("connection", async (socket) => {
       .where({ ip })
       .update({ image: Buffer.from([]) });
 
-    socket.broadcast.emit("image-clear", result.uuid);
+    socket.broadcast.emit("image-clear", uuid);
     cb({ status: "ok" });
   });
 
@@ -84,7 +85,7 @@ io.on("connection", async (socket) => {
 
     await db("canvas_entries").where({ ip }).update({ image: pointsBuf });
 
-    socket.broadcast.emit("image-update", result.uuid, points);
+    socket.broadcast.emit("image-update", uuid, points);
     cb({ status: "ok" });
   });
 

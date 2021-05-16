@@ -1,3 +1,4 @@
+// Colours with leading zeros may be interpreted incorrectly
 const colors = [
   "#3f51b5",
   "#2680c0",
@@ -5,7 +6,7 @@ const colors = [
   "#ca6d16",
   "#fce588",
   "#324d67",
-  "#0e7c86",
+  "#1e7c86",
   "#52d1da",
   "#a71b1b",
   "#f29c9c",

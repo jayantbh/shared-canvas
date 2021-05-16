@@ -159,11 +159,37 @@ small {
 }
 
 .canvases {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
   background-color: #e7e7e7;
   box-shadow: 11px 11px 22px #c7c7c7, -11px -11px 22px #f9f9f9;
   border-radius: 8px;
   overflow: hidden;
+}
+
+@keyframes stroke-path {
+  from {
+    stroke-dashoffset: 0%;
+  }
+  to {
+    stroke-dashoffset: 235% * 2;
+  }
+}
+
+#svg-loader {
+  position: absolute;
+
+  path {
+    stroke-dasharray: 235%;
+    stroke-dashoffset: 0%;
+    animation-name: stroke-path;
+    animation-fill-mode: forwards;
+    animation-duration: 4s;
+    animation-iteration-count: infinite;
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  }
 }
 
 #draw-area {

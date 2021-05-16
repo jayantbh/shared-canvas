@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Express + Parcel</title>
+    <title>Shared Canvas</title>
 
     <link rel="stylesheet" href="./reset.css" />
     <link rel="stylesheet" href="./main.scss" />
@@ -38,6 +38,20 @@
       <div class="canvases">
         <canvas id="view-area" height="4000" width="4000"></canvas>
         <canvas id="draw-area" height="4000" width="4000"></canvas>
+        <svg
+          id="svg-loader"
+          width="220"
+          height="220"
+          viewBox="0 0 220 220"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M90.793 67.1172C71.3281 67.1172 54.0547 79.5352 47.8242 97.9688C47.2656 99.6016 45.8047 100.805 44.0859 100.977C26.7695 102.867 13.707 117.434 13.707 134.879C13.707 153.699 29.0039 168.996 47.8242 168.996H172.176C190.996 168.996 206.293 153.699 206.293 134.879C206.293 122.246 199.332 110.687 188.16 104.715C186.57 103.855 185.625 102.137 185.797 100.332C185.926 99 186.012 97.625 186.012 96.25C186.012 71.2422 165.645 50.875 140.637 50.875C127.316 50.875 114.684 56.7188 106.047 66.9453C104.973 68.2344 103.211 68.793 101.578 68.4062C97.8828 67.5898 94.2734 67.1172 90.793 67.1172Z"
+            stroke="#888"
+            stroke-width="12"
+          />
+        </svg>
       </div>
     </div>
     <script src="./main.js"></script>
