@@ -8,5 +8,4 @@ TODO:
 
 - Create a screen where you can see people's individual arts in a list.
 - Create a screen where you can see a single person's art, live.
-- Move client-side rendering logic to service workers.
 - Add a loader UI that shows how many art submissions are being loaded.
