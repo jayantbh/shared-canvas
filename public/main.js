@@ -302,7 +302,7 @@ class WorkerCanvas {
  * @param {Worker} worker
  */
 const handleWorker = (worker) => {
-  WorkerCanvas(worker);
+  new WorkerCanvas(worker);
 };
 
 window.onload = () => {

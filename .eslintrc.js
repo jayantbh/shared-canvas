@@ -2,6 +2,7 @@ module.exports = {
   env: {
     browser: true,
     es2021: true,
+    commonjs: true,
     node: true,
     jest: true,
   },
@@ -21,5 +22,6 @@ module.exports = {
     'func-names': 'off',
     'import/prefer-default-export': 'off',
     'no-continue': 'off',
+    'no-new': 'off',
   },
 };
