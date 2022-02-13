@@ -64,7 +64,13 @@ small {
   }
 }
 
-#clear-button {
+.btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn-wrapper button {
   margin-top: auto;
   border: none;
   border-radius: 8px;

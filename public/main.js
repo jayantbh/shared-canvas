@@ -67,7 +67,7 @@ class WorkerCanvas {
     this.socket.on('client-connection', (count) => {
       document.getElementById('client-count').innerText = `${count} user${
         count !== 1 ? 's' : ''
-      } drawing here`;
+      } online`;
     });
 
     /**
@@ -78,10 +78,11 @@ class WorkerCanvas {
       this.globalArt = allArt.reduce(
         (acc, art) => ({
           ...acc,
-          [art.id]: new Float32Array(art.points),
+          [art.id]: new Float32Array(art.image),
         }),
         {},
       );
+
       this.redrawGlobal(Object.values(this.globalArt));
       this.redraw(new Float32Array(myArt), 'draw');
       this.canvasReadyToDraw();
@@ -96,8 +97,9 @@ class WorkerCanvas {
       const existingPts = this.globalArt[id] || [];
       this.globalArt = {
         ...this.globalArt,
-        [id]: existingPts.concat(...points),
+        [id]: [...existingPts, ...points],
       };
+      // TODO: Forgot why the -6 is here since I last worked on it
       this.redraw([...existingPts.slice(-6), ...points], 'view');
     });
 
@@ -251,10 +253,11 @@ class WorkerCanvas {
     document.body.onmouseleave = this.onDrawEnd;
 
     document.getElementById('clear-button').onclick = () => {
-      this.socket.emit('clear-image', () => {
-        // clearCanvas(canvas);
-        this.worker.postMessage({ event: 'clear-canvas', data: 'draw' });
-      });
+      this.socket.emit('clear-image');
+    };
+
+    document.getElementById('new-room-btn').onclick = () => {
+      window.location.pathname = '/new';
     };
 
     const noProp = (e) => e.stopPropagation();

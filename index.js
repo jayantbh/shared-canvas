@@ -20,12 +20,36 @@ const { methods } = require('./node_utils/middlewares/methods');
 process.title = 'Shared Canvas';
 const port = process.env.port || 3000;
 
-// app.use(methods);
+app.use(methods);
 
 app.set('view engine', 'html');
 app.engine('html', hbs.__express);
 
+const indexHandler = async (req, res) => {
+  const url = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+
+  const cookies = parse(req.headers.cookie || '');
+  const roomUuid = getRoomIdFromURL(url);
+
+  if (!cookies?.userUuid) {
+    const userUuid = uuid();
+    res.cookie('userUuid', userUuid, {
+      secure: true,
+      httpOnly: true,
+      expires: dayjs().add(30, 'days').toDate(),
+    });
+
+    await db('users').insert({ uuid: userUuid }).onConflict('uuid').ignore();
+  }
+
+  await db('drawing_rooms').insert({ uuid: roomUuid }).onConflict('uuid').ignore();
+
+  res.render('index', { colors });
+};
+
 app.set('views', `${__dirname}/dist`);
+
+app.get('/', indexHandler);
 
 app.get('/status', (req, res) => {
   res.sendStatus(200);
@@ -33,30 +57,16 @@ app.get('/status', (req, res) => {
 
 app.use(express.static('dist'));
 
-app.get('/', async (req, res) => {
-  console.log(1111111, '\n\n\n\n\n\n', req.headers.cookies);
-  // const cookies = parse(req.headers.cookies);
-  // const roomUuid = getRoomIdFromURL(req.url);
-
-  // if (!cookies?.userUuid) {
-  //   const userUuid = uuid();
-  //   res.cookie('userUuid', userUuid, {
-  //     secure: true,
-  //     httpOnly: true,
-  //     expires: dayjs().add(30, 'days').toDate(),
-  //   });
-
-  //   await db('users').insert({ uuid: userUuid }).onConflict('uuid').merge();
-  //   await db('drawing_room').insert({ uuid: roomUuid }).onConflict('uuid').merge();
-  // }
-
-  res.render('index', { colors });
+app.get('/new', async (req, res) => {
+  res.redirect(`/room/${uuid()}`);
 });
+
+app.get('/room/:roomId', indexHandler);
 
 const getAllArt = async ({ userUuid, roomUuid }) => {
   let results = await db('canvas_entries')
-    .select(['image', 'user_uuid', 'uuid'])
-    .where({ room_uuid: roomUuid, user_uuid: userUuid });
+    .select(['image', 'user_uuid'])
+    .where({ room_uuid: roomUuid });
 
   let myResult = null;
   if (userUuid) {
@@ -64,75 +74,78 @@ const getAllArt = async ({ userUuid, roomUuid }) => {
     results = results
       .filter((r) => r.user_uuid !== userUuid)
       .map((res) => ({
-        id: res.uuid,
+        id: res.user_uuid,
         image: res.image,
       }));
   }
   return [results, myResult?.image];
 };
 
-// io.on('connection', async (socket) => {
-//   const ip = socket.conn.remoteAddress;
-//   const roomUuid = getRoomIdFromURL(socket.handshake.headers.referer);
+io.on('connection', async (socket) => {
+  const ip = socket.conn.remoteAddress;
+  const roomUuid = getRoomIdFromURL(socket.handshake.headers.referer);
 
-//   const cookies = parse(socket.handshake.headers.cookies);
-//   const userUuid = cookies?.userUuid;
+  socket.join(roomUuid);
 
-//   const dbQueryParams = { user_uuid: userUuid, room_uuid: roomUuid };
-//   const dbQueryFields = ['user_uuid', 'room_uuid'];
+  const cookies = parse(socket.handshake.headers.cookie);
+  const userUuid = cookies?.userUuid;
 
-//   const log = (...messages) => {
-//     // eslint-disable-next-line no-console
-//     console.info(`[IP: ${ip}]: `, dbQueryParams, ...messages);
-//   };
-//   log('A user connected.', roomUuid);
+  const dbQueryParams = { user_uuid: userUuid, room_uuid: roomUuid };
+  const dbQueryFields = ['user_uuid', 'room_uuid'];
 
-//   socket.emit('client-connection', io.engine.clientsCount);
-//   socket.broadcast.emit('client-connection', io.engine.clientsCount);
+  const log = (...messages) => {
+    // eslint-disable-next-line no-console
+    console.info(`[IP: ${ip}]: `, dbQueryParams, ...messages);
+  };
+  log('A user connected.', roomUuid);
 
-//   // Upsert a new entry for current user, and get the uuid back
-//   await db('canvas_entries')
-//     .insert(dbQueryParams)
-//     .onConflict(dbQueryFields)
-//     .merge();
+  socket.emit('client-connection', io.engine.clientsCount);
+  socket.broadcast.emit('client-connection', io.engine.clientsCount);
 
-//   // eslint-disable-next-line no-console
-//   console.info(dbQueryParams);
+  // Upsert a new entry for current user, and get the uuid back
+  await db('canvas_entries')
+    .insert(dbQueryParams)
+    .onConflict(dbQueryFields)
+    .ignore();
 
-//   const [allArt, myArt] = await getAllArt({ userUuid, roomUuid });
-//   socket.emit('image', allArt, myArt, uuid);
+  // eslint-disable-next-line no-console
+  console.info(dbQueryParams);
 
-//   socket.on('clear-image', async (cb) => {
-//     log('A user cleared image.');
-//     await db('canvas_entries')
-//       .where(dbQueryParams)
-//       .update({ image: Buffer.from([]) });
+  const [allArt, myArt] = await getAllArt({ userUuid, roomUuid });
+  socket.emit('image', allArt, myArt, userUuid);
 
-//     socket.broadcast.emit('image-clear', uuid);
-//     cb({ status: 'ok' });
-//   });
+  socket.on('clear-image', async (cb) => {
+    log('A user cleared image.');
+    await db('canvas_entries')
+      .where(dbQueryParams)
+      .update({ image: Buffer.from([]) });
 
-//   socket.on('image', async (points, cb) => {
-//     let { image } = await db('canvas_entries')
-//       .select('image')
-//       .where(dbQueryParams)
-//       .first();
+    socket.emit('image-clear', userUuid);
+    socket.to(roomUuid).emit('image-clear', userUuid);
+    cb({ status: 'ok' });
+  });
 
-//     if (!image) image = Buffer.from([]);
+  socket.on('image', async (points, cb) => {
+    let { image } = await db('canvas_entries')
+      .select('image')
+      .where(dbQueryParams)
+      .first();
 
-//     const pointsBuf = Buffer.concat([image, points]);
+    if (!image) image = Buffer.from([]);
 
-//     await db('canvas_entries').where(dbQueryParams).update({ image: pointsBuf });
+    const pointsBuf = Buffer.concat([image, points]);
 
-//     socket.broadcast.emit('image-update', uuid, points);
-//     cb({ status: 'ok' });
-//   });
+    await db('canvas_entries').where(dbQueryParams).update({ image: pointsBuf });
 
-//   socket.on('disconnect', () => {
-//     log('A user disconnected.');
-//     socket.broadcast.emit('client-connection', io.engine.clientsCount);
-//   });
-// });
+    socket.to(roomUuid).emit('image-update', userUuid, points);
+    cb({ status: 'ok' });
+  });
+
+  socket.on('disconnect', () => {
+    log('A user disconnected.');
+    socket.broadcast.emit('client-connection', io.engine.clientsCount);
+  });
+});
 
 server.listen(port, '0.0.0.0', () => {
   // eslint-disable-next-line no-console
