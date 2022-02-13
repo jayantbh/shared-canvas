@@ -4,7 +4,7 @@ export const getEventXY = (e, rect) => {
       x: e.clientX - rect.left,
       y: e.clientY - rect.top,
     };
-  } else if (e.touches !== undefined) {
+  } if (e.touches !== undefined) {
     return {
       x: e.touches[0].clientX - rect.left,
       y: e.touches[0].clientY - rect.top,

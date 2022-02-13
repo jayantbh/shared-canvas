@@ -1,19 +1,19 @@
-import io from "socket.io/client-dist/socket.io";
-import { colorToDataNum } from "../utils/color";
-import { getEventXY } from "../utils/dom";
-import { scaleNum, getDistanceFromCanvas, initCanvas } from "../utils/canvas";
+import io from 'socket.io/client-dist/socket.io';
+import { colorToDataNum } from '../utils/color';
+import { getEventXY } from '../utils/dom';
+import { scaleNum, getDistanceFromCanvas, initCanvas } from '../utils/canvas';
 
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 class WorkerCanvas {
-  /** @type {Worker} will never be null due to constructor check*/
+  /** @type {Worker} will never be null due to constructor check */
   worker = null;
   socket = null;
   initialized = false;
   doDraw = false;
   lastCoords = null;
   frame = -1;
-  color = "#000";
+  color = '#000';
 
   batch = [];
   myArt = [];
@@ -27,8 +27,7 @@ class WorkerCanvas {
    * @param {Worker} worker
    */
   constructor(worker) {
-    if (!worker || !(worker instanceof Worker))
-      throw new Error("Invalid param. Requires a Web Worker instance.");
+    if (!worker || !(worker instanceof Worker)) { throw new Error('Invalid param. Requires a Web Worker instance.'); }
     this.worker = worker;
 
     this.initCanvas();
@@ -40,17 +39,18 @@ class WorkerCanvas {
       this.initSocket();
       this.initialized = true;
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e);
     }
   };
 
   canvasReadyToDraw = () => {
-    document.getElementById("svg-loader")?.remove();
+    document.getElementById('svg-loader')?.remove();
     this.drawStuff();
   };
 
   swapClientStatusText = () => {
-    const el = document.getElementById("client-status");
+    const el = document.getElementById('client-status');
     if (!el) return;
 
     setInterval(() => {
@@ -62,64 +62,57 @@ class WorkerCanvas {
 
   initSocket = () => {
     this.socket = io();
-    console.info("Loaded!", this.socket);
     this.swapClientStatusText();
 
-    this.socket.on("client-connection", (count) => {
-      console.log("Client", count);
-      document.getElementById("client-count").innerText = `${count} user${
-        count !== 1 ? "s" : ""
+    this.socket.on('client-connection', (count) => {
+      document.getElementById('client-count').innerText = `${count} user${
+        count !== 1 ? 's' : ''
       } drawing here`;
     });
 
     /**
      * Only fired on connection
      */
-    this.socket.on("image", (allArt, myArt, id) => {
+    this.socket.on('image', (allArt, myArt, id) => {
       this.myId = id;
-      console.log(id);
       this.globalArt = allArt.reduce(
         (acc, art) => ({
           ...acc,
           [art.id]: new Float32Array(art.points),
         }),
-        {}
+        {},
       );
-      console.log(allArt, myArt);
       this.redrawGlobal(Object.values(this.globalArt));
-      this.redraw(new Float32Array(myArt), "draw");
+      this.redraw(new Float32Array(myArt), 'draw');
       this.canvasReadyToDraw();
     });
 
     /**
      * Updates from other clients
      */
-    this.socket.on("image-update", (id, points) => {
-      points = new Float32Array(points);
+    this.socket.on('image-update', (id, _points) => {
+      const points = new Float32Array(_points);
 
       const existingPts = this.globalArt[id] || [];
       this.globalArt = {
         ...this.globalArt,
         [id]: existingPts.concat(...points),
       };
-      this.redraw([...existingPts.slice(-6), ...points], "view");
+      this.redraw([...existingPts.slice(-6), ...points], 'view');
     });
 
     /**
      * Clear from all clients, including self
      */
-    this.socket.on("image-clear", (id) => {
-      console.log({ id });
-
+    this.socket.on('image-clear', (id) => {
       delete this.globalArt[id];
-      this.clearCanvas("view");
+      this.clearCanvas('view');
 
       this.redrawGlobal(Object.values(this.globalArt));
 
       if (id === this.myId) {
         this.myArt = [];
-        this.clearCanvas("draw");
-        return;
+        this.clearCanvas('draw');
       }
     });
 
@@ -127,16 +120,15 @@ class WorkerCanvas {
   };
 
   serverBatch = () => {
-    let batchIntervalId = setInterval(() => {
+    const batchIntervalId = setInterval(() => {
       if (!this.batch.length) return;
 
       clearInterval(batchIntervalId);
 
       this.myArt.push(...this.batch);
-      const length = this.batch.length;
+      const { length } = this.batch;
 
-      this.socket.emit("image", new Float32Array(this.batch).buffer, () => {
-        console.log("updated on server");
+      this.socket.emit('image', new Float32Array(this.batch).buffer, () => {
         this.batch.splice(0, length);
         this.serverBatch();
       });
@@ -152,14 +144,14 @@ class WorkerCanvas {
    * @param {'draw' | 'view'} canvas
    */
   redraw = (points, canvas) => {
-    this.worker.postMessage({ event: "redraw", data: { points, canvas } });
+    this.worker.postMessage({ event: 'redraw', data: { points, canvas } });
   };
 
   /**
    * @param {Float32Array[]} arrayOfPoints
    */
   redrawGlobal = (arrayOfPoints) => {
-    this.worker.postMessage({ event: "bulk-redraw", data: arrayOfPoints });
+    this.worker.postMessage({ event: 'bulk-redraw', data: arrayOfPoints });
   };
 
   /**
@@ -167,9 +159,8 @@ class WorkerCanvas {
    * @param {{x: number, y: number} | null} xy2
    */
   drawLine = (xy1, xy2) => {
-    console.log(xy1, xy2, this.color);
     this.worker.postMessage({
-      event: "draw-line",
+      event: 'draw-line',
       data: {
         xy1,
         xy2,
@@ -199,10 +190,10 @@ class WorkerCanvas {
   };
 
   allowDraw = (e) => {
-    if (!this.canvas) return;
+    if (!this.canvas) return false;
     const rect = this.canvas.getBoundingClientRect();
-    let { x, y } = getEventXY(e, rect);
-    if (getDistanceFromCanvas(x, y, this.canvas) > 50) return;
+    const { x, y } = getEventXY(e, rect);
+    if (getDistanceFromCanvas(x, y, this.canvas) > 50) return false;
     return true;
   };
 
@@ -245,11 +236,11 @@ class WorkerCanvas {
    * @param {'draw' | 'view'} canvas
    */
   clearCanvas = (canvas) => {
-    this.worker.postMessage({ event: "clear-canvas", data: canvas });
+    this.worker.postMessage({ event: 'clear-canvas', data: canvas });
   };
 
   drawStuff = () => {
-    if (!this.initialized) throw new Error("Canvas element not found");
+    if (!this.initialized) throw new Error('Canvas element not found');
 
     document.body.onmouseup = this.onTrigger;
     document.body.onmousedown = this.onTrigger;
@@ -259,16 +250,17 @@ class WorkerCanvas {
     document.body.ontouchend = this.onTouchEnd;
     document.body.onmouseleave = this.onDrawEnd;
 
-    document.getElementById("clear-button").onclick = () => {
-      this.socket.emit("clear-image", () => {
+    document.getElementById('clear-button').onclick = () => {
+      this.socket.emit('clear-image', () => {
         // clearCanvas(canvas);
-        this.worker.postMessage({ event: "clear-canvas", data: "draw" });
+        this.worker.postMessage({ event: 'clear-canvas', data: 'draw' });
       });
     };
 
     const noProp = (e) => e.stopPropagation();
 
-    [...document.querySelectorAll("#color-list svg")].forEach((el) => {
+    [...document.querySelectorAll('#color-list svg')].forEach((el) => {
+      /* eslint-disable no-param-reassign */
       el.onmouseup = noProp;
       el.onmousedown = noProp;
       el.onmousemove = noProp;
@@ -278,22 +270,25 @@ class WorkerCanvas {
       el.onmouseleave = noProp;
       el.onclick = (e) => {
         noProp(e);
-        this.color = el.getAttribute("color");
+        this.color = el.getAttribute('color');
       };
+      /* eslint-enable no-param-reassign */
     });
   };
 
   receiveWorkerEvents = () => {
-    this.worker.addEventListener("message", (e) => {
+    this.worker.addEventListener('message', (e) => {
       const { event, data } = e.data;
 
       switch (event) {
-        case "text": {
+        case 'text': {
+          // eslint-disable-next-line no-console
           console.log(data);
           break;
         }
-        case "unhandled-event": {
-          console.error("Unhandled event: ", data);
+        case 'unhandled-event': {
+          // eslint-disable-next-line no-console
+          console.error('Unhandled event: ', data);
           break;
         }
         default:
@@ -307,15 +302,16 @@ class WorkerCanvas {
  * @param {Worker} worker
  */
 const handleWorker = (worker) => {
-  new WorkerCanvas(worker);
+  WorkerCanvas(worker);
 };
 
 window.onload = () => {
   if (window.Worker) {
     try {
-      handleWorker(new Worker(new URL("./worker.js", import.meta.url)));
+      handleWorker(new Worker(new URL('./worker.js', import.meta.url)));
     } catch (error) {
-      console.log("Web Worker registration failed", error);
+      // eslint-disable-next-line no-console
+      console.error('Web Worker registration failed', error);
     }
   }
 };
