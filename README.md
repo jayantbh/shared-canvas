@@ -4,6 +4,8 @@
 
 Shared canvas is a square canvas where you and everyone else can scribble away together.
 
+This project has been built mostly in the native web stack (1).
+
 TODO:
 
 - Create a screen where you can see people's individual arts in a list.
@@ -17,3 +19,7 @@ TODO:
 3. `yarn reset-db`
 4. `yarn start`
 5. Open `localhost:3000` in two different windows (or browsers, one in incognito?), and carry on!
+
+
+### Notes
+1. The HTML has some help from handlebars, and the CSS uses some SCSS features, and the JS is transpiled using Babel. However, basically no libraries or frameworks to actually lift the load of implementating the layouts, functionality, event handling, or lifecycles were used for the client side code.
