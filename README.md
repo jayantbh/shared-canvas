@@ -11,6 +11,11 @@ TODO:
 - Create a screen where you can see people's individual arts in a list.
 - Create a screen where you can see a single person's art, live.
 - Add a loader UI that shows how many art submissions are being loaded.
+- Ensure everyone sees the same output (rework the canvas entries mechanism).
+  - Create multiple entries for each user/room pair, and render them ordered by time.
+  - Since we do want a user to be able to delete just their art, or be able to delete art by a single user, the compromise will be that doubly-overlapped stroke will only render one over the other.
+  - We'll move away from having a draw and a move canvas.
+- Make it work on Safari (without workers).
 
 # Development
 
