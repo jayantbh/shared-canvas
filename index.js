@@ -31,17 +31,17 @@ const indexHandler = async (req, res) => {
   const cookies = parse(req.headers.cookie || '');
   const roomUuid = getRoomIdFromURL(url);
 
+  const userUuid = cookies?.userUuid || uuid();
+
   if (!cookies?.userUuid) {
-    const userUuid = uuid();
     res.cookie('userUuid', userUuid, {
       secure: true,
       httpOnly: true,
       expires: dayjs().add(30, 'days').toDate(),
     });
-
-    await db('users').insert({ uuid: userUuid }).onConflict('uuid').ignore();
   }
 
+  await db('users').insert({ uuid: userUuid }).onConflict('uuid').ignore();
   await db('drawing_rooms').insert({ uuid: roomUuid }).onConflict('uuid').ignore();
 
   res.render('index', { colors });

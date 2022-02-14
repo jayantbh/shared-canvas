@@ -262,7 +262,9 @@ class WorkerCanvas {
 
     const noProp = (e) => e.stopPropagation();
 
-    [...document.querySelectorAll('#color-list svg')].forEach((el) => {
+    const colorCells = [...document.querySelectorAll('#color-list svg')];
+
+    colorCells.forEach((el) => {
       /* eslint-disable no-param-reassign */
       el.onmouseup = noProp;
       el.onmousedown = noProp;
@@ -274,6 +276,8 @@ class WorkerCanvas {
       el.onclick = (e) => {
         noProp(e);
         this.color = el.getAttribute('color');
+        colorCells.forEach((_el) => _el.classList.remove('selected-color'));
+        el.classList.add('selected-color');
       };
       /* eslint-enable no-param-reassign */
     });

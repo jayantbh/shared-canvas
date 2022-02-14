@@ -47,6 +47,8 @@ small {
   margin-bottom: 40px;
 }
 
+$base-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #f0f0f0;
+
 #color-list {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -60,7 +62,11 @@ small {
   svg {
     border-radius: 50%;
     overflow: hidden;
-    box-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #f0f0f0;
+    box-shadow: $base-shadow;
+
+    &.selected-color {
+      box-shadow: 0 0 0 2px #FFFA, 0 0 0 4px currentColor, $base-shadow;
+    }
   }
 }
 
@@ -75,7 +81,7 @@ small {
   border: none;
   border-radius: 8px;
   background: #e0e0e0;
-  box-shadow: 5px 5px 10px #d0d0d0, -5px -5px 10px #f0f0f0;
+  box-shadow: $base-shadow;
   padding: 12px 20px;
   font-family: "Arvo", serif;
   font-size: 1.2em;
